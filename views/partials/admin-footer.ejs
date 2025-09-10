@@ -1,0 +1,26 @@
+<!-- Ini adalah penutup dari <main> yang bisa di-scroll -->
+            </main> 
+        <!-- Ini adalah penutup dari wrapper konten utama -->
+        </div>
+    </div> 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburger = document.getElementById('hamburger-button-admin');
+            
+            if (!sidebar || !overlay || !hamburger) return;
+
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            };
+
+            hamburger.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        });
+    </script>
+</body>
+</html>
+

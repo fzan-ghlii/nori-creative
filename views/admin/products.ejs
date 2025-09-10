@@ -1,0 +1,119 @@
+<%- include('../partials/admin-header.ejs', { pageTitle: 'Manajemen Produk', path: '/admin/products' }) %>
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <h2 class="text-2xl font-semibold leading-tight text-white">Manajemen Produk</h2>
+            <p class="text-slate-400">Tambah, edit, atau hapus produk yang tampil di halaman utama.</p>
+        </div>
+
+        <!-- Formulir Cerdas (untuk Tambah atau Edit) -->
+        <div class="mt-8 bg-slate-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-white mb-4">
+                <%= editingProduct ? 'Edit Produk' : 'Tambah Produk Baru' %>
+            </h3>
+            <form action="<%= adminUrl %>/products/<%= editingProduct ? 'edit/' + editingProduct.id : 'add' %>" method="POST" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-slate-300">Nama Produk</label>
+                    <input type="text" name="name" id="name" required
+                           class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                           value="<%= editingProduct ? editingProduct.name : '' %>">
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-slate-300">Deskripsi</label>
+                    <textarea name="description" id="description" rows="3" required
+                              class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"><%= editingProduct ? editingProduct.description : '' %></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-slate-300">Harga (Rp)</label>
+                        <input type="number" name="price" id="price" required placeholder="Contoh: 50000"
+                               class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                               value="<%= editingProduct ? editingProduct.price : '' %>">
+                    </div>
+                    <div>
+                        <label for="discount_percent" class="block text-sm font-medium text-slate-300">Diskon (%)</label>
+                        <input type="number" name="discount_percent" id="discount_percent" min="0" max="100" placeholder="Contoh: 25"
+                               class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                               value="<%= editingProduct ? editingProduct.discount_percent : '0' %>">
+                    </div>
+                    <div>
+                        <label for="icon_class" class="block text-sm font-medium text-slate-300">Kelas Ikon (Font Awesome)</label>
+                        <input type="text" name="icon_class" id="icon_class" required placeholder="Contoh: fas fa-file-code"
+                               class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                               value="<%= editingProduct ? editingProduct.icon_class : '' %>">
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="is_popular" name="is_popular" type="checkbox"
+                               class="focus:ring-cyan-500 h-4 w-4 text-cyan-600 border-slate-600 bg-slate-700 rounded"
+                               <%= (editingProduct && editingProduct.is_popular) ? 'checked' : '' %>>
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="is_popular" class="font-medium text-slate-300">Jadikan Produk Populer</label>
+                        <p class="text-slate-500">Produk ini akan diberi tanda khusus di halaman utama.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                        <%= editingProduct ? 'Simpan Perubahan' : 'Tambah Produk' %>
+                    </button>
+                    <% if (editingProduct) { %>
+                        <a href="<%= adminUrl %>/products" class="text-slate-400 hover:text-white">Batal Edit</a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Produk -->
+        <div class="mt-8">
+            <div class="overflow-x-auto bg-slate-800 shadow rounded-lg">
+                <div class="inline-block min-w-full">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Nama Produk</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Harga</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-center text-xs font-semibold text-slate-300 uppercase tracking-wider">Populer</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-center text-xs font-semibold text-slate-300 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product => { %>
+                            <tr class="hover:bg-slate-700/50">
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <p class="text-white whitespace-no-wrap"><%= product.name %></p>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <p class="text-slate-300 whitespace-no-wrap">
+                                        <%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price) %>
+                                    </p>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm text-center">
+                                    <% if (product.is_popular) { %>
+                                        <i class="fas fa-check-circle text-green-400"></i>
+                                    <% } else { %>
+                                        <i class="fas fa-times-circle text-slate-500"></i>
+                                    <% } %>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm text-center">
+                                    <div class="flex item-center justify-center space-x-4">
+                                        <a href="<%= adminUrl %>/products/edit/<%= product.id %>" class="text-yellow-400 hover:text-yellow-300">Edit</a>
+                                        <form action="<%= adminUrl %>/products/delete/<%= product.id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
+                                            <button type="submit" class="text-red-500 hover:text-red-400">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

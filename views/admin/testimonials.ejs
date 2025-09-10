@@ -1,0 +1,102 @@
+<%- include('../partials/admin-header.ejs', { pageTitle: 'Manajemen Ulasan', path: '/admin/testimonials' }) %>
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <h2 class="text-2xl font-semibold leading-tight text-white">Manajemen Ulasan</h2>
+            <p class="text-slate-400">Kelola testimoni yang tampil di halaman utama.</p>
+        </div>
+
+        <!-- Formulir Cerdas (untuk Tambah atau Edit) -->
+        <div class="mt-8 bg-slate-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-white mb-4">
+                <%= editingTestimonial ? 'Edit Ulasan' : 'Tambah Ulasan Baru' %>
+            </h3>
+            <form action="<%= adminUrl %>/testimonials/<%= editingTestimonial ? 'edit/' + editingTestimonial.id : 'add' %>" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customer_name" class="block text-sm font-medium text-slate-300">Nama Klien</label>
+                        <input type="text" name="customer_name" id="customer_name" required
+                               class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                               value="<%= editingTestimonial ? editingTestimonial.customer_name : '' %>">
+                    </div>
+                    <div>
+                        <label for="customer_job" class="block text-sm font-medium text-slate-300">Pekerjaan Klien</label>
+                        <input type="text" name="customer_job" id="customer_job" required
+                               class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                               value="<%= editingTestimonial ? editingTestimonial.customer_job : '' %>">
+                    </div>
+                </div>
+                <div>
+                    <label for="review_text" class="block text-sm font-medium text-slate-300">Isi Ulasan</label>
+                    <textarea name="review_text" id="review_text" rows="3" required
+                              class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"><%= editingTestimonial ? editingTestimonial.review_text : '' %></textarea>
+                </div>
+                <div>
+                    <label for="rating" class="block text-sm font-medium text-slate-300">Rating (Jumlah Bintang)</label>
+                    <select name="rating" id="rating" required
+                            class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        <option value="5" <%= (editingTestimonial && editingTestimonial.rating == 5) ? 'selected' : '' %>>5 Bintang</option>
+                        <option value="4" <%= (editingTestimonial && editingTestimonial.rating == 4) ? 'selected' : '' %>>4 Bintang</option>
+                        <option value="3" <%= (editingTestimonial && editingTestimonial.rating == 3) ? 'selected' : '' %>>3 Bintang</option>
+                        <option value="2" <%= (editingTestimonial && editingTestimonial.rating == 2) ? 'selected' : '' %>>2 Bintang</option>
+                        <option value="1" <%= (editingTestimonial && editingTestimonial.rating == 1) ? 'selected' : '' %>>1 Bintang</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                        <%= editingTestimonial ? 'Simpan Perubahan' : 'Tambah Ulasan' %>
+                    </button>
+                    <% if (editingTestimonial) { %>
+                        <a href="<%= adminUrl %>/testimonials" class="text-slate-400 hover:text-white">Batal Edit</a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Ulasan -->
+        <div class="mt-8">
+            <div class="overflow-x-auto bg-slate-800 shadow rounded-lg">
+                 <div class="inline-block min-w-full">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Nama Klien</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Rating</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-center text-xs font-semibold text-slate-300 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% testimonials.forEach(testimonial => { %>
+                            <tr class="hover:bg-slate-700/50">
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <p class="text-white whitespace-no-wrap"><%= testimonial.customer_name %></p>
+                                    <p class="text-slate-400 whitespace-no-wrap text-xs"><%= testimonial.customer_job %></p>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <div class="flex">
+                                        <% for(let i = 0; i < testimonial.rating; i++) { %>
+                                            <i class="fas fa-star text-yellow-400"></i>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm text-center">
+                                    <div class="flex item-center justify-center space-x-4">
+                                        <a href="<%= adminUrl %>/testimonials/edit/<%= testimonial.id %>" class="text-yellow-400 hover:text-yellow-300">Edit</a>
+                                        <form action="<%= adminUrl %>/testimonials/delete/<%= testimonial.id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ulasan ini?');">
+                                            <button type="submit" class="text-red-500 hover:text-red-400">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

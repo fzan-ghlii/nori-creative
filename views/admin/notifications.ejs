@@ -1,0 +1,99 @@
+<%- include('../partials/admin-header.ejs', { pageTitle: 'Manajemen Notifikasi', path: '/admin/notifications' }) %>
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <h2 class="text-2xl font-semibold leading-tight text-white">Manajemen Notifikasi</h2>
+            <p class="text-slate-400">Tambah, edit, atau hapus notifikasi yang tampil di halaman utama.</p>
+        </div>
+
+        <!-- Formulir Cerdas (untuk Tambah atau Edit) -->
+        <div class="mt-8 bg-slate-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-white mb-4">
+                <% if (editingNotification) { %>
+                    Edit Notifikasi
+                <% } else { %>
+                    Tambah Notifikasi Baru
+                <% } %>
+            </h3>
+            <form action="<%= adminUrl %>/notifications/<%= editingNotification ? 'edit/' + editingNotification.id : 'add' %>" method="POST" class="space-y-4">
+                <div>
+                    <label for="title" class="block text-sm font-medium text-slate-300">Judul</label>
+                    <input type="text" name="title" id="title" required
+                           class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                           value="<%= editingNotification ? editingNotification.title : '' %>">
+                </div>
+                <div>
+                    <label for="content" class="block text-sm font-medium text-slate-300">Konten / Deskripsi</label>
+                    <textarea name="content" id="content" rows="3" required
+                              class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"><%= editingNotification ? editingNotification.content : '' %></textarea>
+                </div>
+                <div>
+                    <label for="type" class="block text-sm font-medium text-slate-300">Tipe Notifikasi</label>
+                    <select name="type" id="type" required
+                            class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                        <option value="update" <%= (editingNotification && editingNotification.type === 'update') ? 'selected' : '' %>>Update</option>
+                        <option value="event" <%= (editingNotification && editingNotification.type === 'event') ? 'selected' : '' %>>Event</option>
+                        <option value="maintenance" <%= (editingNotification && editingNotification.type === 'maintenance') ? 'selected' : '' %>>Maintenance</option>
+                        <option value="promo" <%= (editingNotification && editingNotification.type === 'promo') ? 'selected' : '' %>>Promo</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                        <%= editingNotification ? 'Simpan Perubahan' : 'Tambah Notifikasi' %>
+                    </button>
+                    <% if (editingNotification) { %>
+                        <a href="<%= adminUrl %>/notifications" class="text-slate-400 hover:text-white">Batal Edit</a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabel Daftar Notifikasi -->
+        <div class="mt-8">
+            <div class="overflow-x-auto bg-slate-800 shadow rounded-lg">
+                <div class="inline-block min-w-full">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Judul</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Tipe</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-5 py-3 border-b-2 border-slate-700 text-center text-xs font-semibold text-slate-300 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% notifications.forEach(notif => { %>
+                            <tr class="hover:bg-slate-700/50">
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <p class="text-white whitespace-no-wrap"><%= notif.title %></p>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
+                                        <span aria-hidden class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
+                                        <span class="relative"><%= notif.type %></span>
+                                    </span>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm">
+                                    <p class="text-slate-300 whitespace-no-wrap"><%= new Date(notif.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) %></p>
+                                </td>
+                                <td class="px-5 py-4 border-b border-slate-700 text-sm text-center">
+                                    <div class="flex item-center justify-center space-x-4">
+                                        <a href="<%= adminUrl %>/notifications/edit/<%= notif.id %>" class="text-yellow-400 hover:text-yellow-300">Edit</a>
+                                        <form action="<%= adminUrl %>/notifications/delete/<%= notif.id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus notifikasi ini?');">
+                                            <button type="submit" class="text-red-500 hover:text-red-400">Hapus</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

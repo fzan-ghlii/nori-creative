@@ -1,0 +1,83 @@
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - NORI</title>
+    <link rel="stylesheet" href="/admin-style.css"> <!-- Menggunakan CSS dari landing page -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body class="antialiased bg-nori-dark text-nori-light font-inter">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <a href="/" class="flex items-center justify-center space-x-3 group">
+                    <img src="/images/logo.webp" class="h-12 w-auto group-hover:rotate-12 transition-transform duration-300"></img>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">NORI</h1>
+                        <p class="text-sm text-slate-400">Admin Panel</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="glassmorphism p-8 rounded-xl">
+                <h2 class="text-2xl font-bold text-white text-center mb-6">Admin Login</h2>
+
+                <!-- Tampilkan pesan error jika ada -->
+                <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+                    <div class="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg relative mb-6" role="alert">
+                        <span class="block sm:inline"><%= errorMessage %></span>
+                    </div>
+                <% } %>
+
+                <form action="<%= adminUrl %>/login" method="POST">
+                    <div class="mb-4">
+                        <label for="username" class="block text-slate-300 text-sm font-bold mb-2">Username</label>
+                        <input type="text" id="username" name="username" required
+                               class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors duration-300"
+                               placeholder="Masukkan username">
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-slate-300 text-sm font-bold mb-2">Password</label>
+                        <input type="password" id="password" name="password" required
+                               class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors duration-300"
+                               placeholder="Masukkan password">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="submit"
+                                class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-[1.02]">
+                            Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+             <p class="text-center text-slate-500 text-xs mt-6">
+                &copy; 2025 NORI - Digital Portfolio Development.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

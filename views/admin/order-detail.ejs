@@ -1,0 +1,90 @@
+<%- include('../partials/admin-header.ejs', {pageTitle: 'Detail Order', path: '/admin/order-detail' }) %>
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <a href="<%= adminUrl %>/orders" class="text-cyan-400 hover:text-cyan-300 mb-4 inline-block">&larr; Kembali ke Daftar Pesanan</a>
+            <h2 class="text-2xl font-semibold leading-tight text-white">Detail Pesanan #<%= order.ticket_number %></h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <!-- Kolom Detail Pesanan -->
+            <div class="md:col-span-2">
+                <div class="bg-slate-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-white mb-4 border-b border-slate-700 pb-3">Item yang Dipesan</h3>
+                    <% items.forEach(item => { %>
+                        <div class="flex justify-between items-start py-3 border-b border-slate-700">
+                            <div>
+                                <p class="text-white font-semibold"><%= item.quantity %>x <%= item.product_name %></p>
+                                <% if (item.customizations && item.customizations !== '{}') { %>
+                                    <% const customs = JSON.parse(item.customizations); %>
+                                    <div class="text-xs text-slate-400 mt-1">
+                                    <% Object.keys(customs).forEach(key => { %>
+                                        <span><strong><%= key %>:</strong> <%= customs[key] %></span><br>
+                                    <% }); %>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <p class="text-slate-300"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price * item.quantity) %></p>
+                        </div>
+                    <% }); %>
+                    <div class="flex justify-between items-center mt-4 font-bold text-lg">
+                        <p class="text-white">TOTAL</p>
+                        <p class="text-cyan-400"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(order.total_amount) %></p>
+                    </div>
+                </div>
+
+                 <div class="bg-slate-800 p-6 rounded-lg shadow-lg mt-8">
+                    <h3 class="text-xl font-semibold text-white mb-4">Catatan dari Klien</h3>
+                    <p class="text-slate-300 italic">
+                        <%= order.customer_notes ? order.customer_notes : 'Tidak ada catatan.' %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Kolom Info & Aksi -->
+            <div>
+                <div class="bg-slate-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-white mb-4">Info Klien</h3>
+                    <div class="space-y-2 text-sm">
+                        <p class="text-slate-400">Nama: <span class="text-white font-semibold"><%= order.customer_name %></span></p>
+                        <p class="text-slate-400">Email: <span class="text-white font-semibold"><%= order.customer_email %></span></p>
+                        <p class="text-slate-400">Tanggal Pesan: <span class="text-white font-semibold"><%= new Date(order.created_at).toLocaleString('id-ID') %></span></p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mb-2 mt-6 pt-4 border-t border-slate-700">Status Pesanan</h3>
+                    <% 
+                    let color = 'yellow';
+                    let text = 'Menunggu Pembayaran';
+                    if (order.status === 'SUCCESS') { color = 'green'; text = 'Telah Dibayar'; }
+                    if (order.status === 'PROCESSING') { color = 'blue'; text = 'Dalam Proses'; }
+                    if (order.status === 'COMPLETED') { color = 'purple'; text = 'Selesai'; }
+                    if (order.status === 'FAILED') { color = 'red'; text = 'Gagal'; }
+                    %>
+                    <p>Status Saat Ini: 
+                        <span class="relative inline-block px-2 py-1 text-xs font-semibold text-<%= color %>-900 leading-tight">
+                            <span aria-hidden class="absolute inset-0 bg-<%= color %>-200 opacity-50 rounded-full"></span>
+                            <span class="relative"><%= text %></span>
+                        </span>
+                    </p>
+
+                    <% if (order.status === 'SUCCESS' || order.status === 'PROCESSING') { %>
+                        <form action="<%= adminUrl %>/orders/update-status/<%= order.id %>" method="POST" class="mt-4">
+                            <label for="newStatus" class="block text-sm font-medium text-slate-300">Ubah Status Menjadi:</label>
+                            <select name="newStatus" id="newStatus" class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                                <% if (order.status === 'SUCCESS') { %>
+                                    <option value="PROCESSING">Dalam Proses Pengerjaan</option>
+                                <% } %>
+                                <option value="COMPLETED">Pengerjaan Selesai</option>
+                            </select>
+                            <button type="submit" class="w-full mt-3 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">Update Status</button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

@@ -1,0 +1,90 @@
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Judul halaman akan dinamis -->
+    <title><%= pageTitle %> - NORI Admin</title>
+    <link rel="stylesheet" href="/admin-style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+        .sidebar-link.active { background-color: #06b6d4; color: white; }
+        /* Mencegah double scrollbar di beberapa browser */
+        .admin-main-content::-webkit-scrollbar { display: none; }
+        .admin-main-content { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300 font-inter">
+    <div class="relative min-h-screen md:flex">
+        <!-- Overlay untuk sidebar mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-60 z-30 hidden md:hidden"></div>
+
+        <!-- Sidebar Utama -->
+        <aside id="sidebar" class="bg-slate-800 text-slate-100 w-64 space-y-6 py-7 px-2 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-40">
+            <a href="<%= adminUrl %>/dashboard" class="flex items-center space-x-3 group px-4">
+                <img src="/images/logo.webp" class="h-12 w-auto group-hover:rotate-12 transition-transform duration-300"></img>
+                <div>
+                    <h1 class="text-xl font-bold text-white">NORI</h1>
+                    <p class="text-xs text-slate-400">Admin Panel</p>
+                </div>
+            </a>
+            
+            <nav class="flex-grow">
+                 <ul>
+                    <li><a href="<%= adminUrl %>/dashboard" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200"><i class="fas fa-tachometer-alt w-6"></i> Dashboard</a></li>
+                    <li><a href="<%= adminUrl %>/notifications" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200 mt-2"><i class="fas fa-bell w-6"></i> Manajemen Notifikasi</a></li>
+                    <li><a href="<%= adminUrl %>/products" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200 mt-2"><i class="fas fa-box-open w-6"></i> Manajemen Produk</a></li>
+                    <li><a href="<%= adminUrl %>/testimonials" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200 mt-2"><i class="fas fa-star w-6"></i> Manajemen Ulasan</a></li>
+                    <li class="border-t border-slate-700 my-2"></li>
+                    <li><a href="<%= adminUrl %>/orders" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200 mt-2"><i class="fas fa-receipt w-6"></i> Manajemen Pesanan</a></li>
+                    <li class="border-t border-slate-700 my-2"></li>
+                    <li><a href="<%= adminUrl %>/maintenance" class="sidebar-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors duration-200 mt-2"><i class="fas fa-power-off w-6"></i> Mode Maintenance</a></li>
+                </ul>
+            </nav>
+
+            <div class="mt-auto">
+                <a href="<%= adminUrl %>/logout" class="flex items-center p-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors duration-200">
+                    <i class="fas fa-sign-out-alt w-6"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Konten Utama sekarang memiliki wrapper sendiri -->
+        <div class="flex-1 flex flex-col">
+             <!-- Top bar untuk mobile yang SEKARANG STICKY -->
+            <header class="p-4 bg-slate-800/80 backdrop-blur-sm md:hidden flex justify-between items-center sticky top-0 z-20 border-b border-slate-700">
+                <a href="<%= adminUrl %>/dashboard" class="flex items-center space-x-2">
+                    <img src="/images/logo.webp" class="h-12 w-auto group-hover:rotate-12 transition-transform duration-300"></img>
+                    <span class="text-lg font-bold text-white">NORI Admin</span>
+                </a>
+                <button id="hamburger-button-admin" class="text-white focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </header>
+            
+            <!-- Wrapper untuk konten yang bisa di-scroll -->
+            <main class="flex-1 overflow-y-auto admin-main-content">
+                <!-- Konten dari halaman lain (misal: notifications.ejs) akan disisipkan di sini -->

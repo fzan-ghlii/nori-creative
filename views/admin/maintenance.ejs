@@ -1,0 +1,75 @@
+<%- include('../partials/admin-header.ejs', { pageTitle: 'Perbaikan', path: '/admin/maintenance' }) %>
+<% const adminUrl = '/nori-secret-panel'; %>
+
+<div class="container mx-auto px-4 sm:px-8">
+    <div class="py-8">
+        <div>
+            <h2 class="text-2xl font-semibold leading-tight text-white">Mode Maintenance</h2>
+            <p class="text-slate-400">Aktifkan mode maintenance untuk menonaktifkan sementara halaman pengunjung.</p>
+        </div>
+
+        <form action="<%= adminUrl %>/maintenance" method="POST" class="mt-8 bg-slate-800 p-6 rounded-lg shadow-lg space-y-6">
+            <!-- Mode Manual -->
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-2">Mode Manual</h3>
+                <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="mode" value="on" class="form-radio text-cyan-500 bg-slate-700 border-slate-600 focus:ring-cyan-500" <%= settings.maintenance_mode === 'on' ? 'checked' : '' %>>
+                        <span class="ml-2">ON</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="mode" value="off" class="form-radio text-cyan-500 bg-slate-700 border-slate-600 focus:ring-cyan-500" <%= settings.maintenance_mode === 'off' ? 'checked' : '' %>>
+                        <span class="ml-2">OFF</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Pesan Maintenance -->
+            <div>
+                <label for="message" class="block text-lg font-semibold text-white">Pesan Maintenance</label>
+                <p class="text-sm text-slate-400 mb-2">Pesan ini akan ditampilkan kepada pengunjung saat mode maintenance aktif.</p>
+                <textarea name="message" id="message" rows="3" required class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"><%= settings.maintenance_message %></textarea>
+            </div>
+
+            <!-- Mode Terjadwal -->
+            <div class="pt-6 border-t border-slate-700">
+                <h3 class="text-xl font-semibold text-white mb-2">Mode Terjadwal (Otomatis)</h3>
+                <label class="flex items-center">
+                    <input type="checkbox" name="schedule_enabled" id="schedule_enabled" class="form-checkbox h-5 w-5 text-cyan-600 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500" <%= settings.maintenance_schedule_enabled === '1' ? 'checked' : '' %>>
+                    <span class="ml-3 text-white">Aktifkan Penjadwalan</span>
+                </label>
+                <div id="schedule-fields" class="mt-4 space-y-4 <%= settings.maintenance_schedule_enabled !== '1' ? 'hidden' : '' %>">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="start_time" class="block text-sm font-medium text-slate-300">Waktu Mulai</label>
+                            <!-- ======================= PERBAIKAN DI SINI ======================= -->
+                            <input type="datetime-local" name="start_time" id="start_time" class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" value="<%= formattedStartTime %>">
+                            <!-- ================================================================= -->
+                        </div>
+                        <div>
+                            <label for="end_time" class="block text-sm font-medium text-slate-300">Waktu Selesai</label>
+                            <!-- ======================= PERBAIKAN DI SINI ======================= -->
+                            <input type="datetime-local" name="end_time" id="end_time" class="mt-1 block w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" value="<%= formattedEndTime %>">
+                            <!-- ================================================================= -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Simpan -->
+            <div class="pt-6 border-t border-slate-700">
+                <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-md transition duration-300">
+                    Simpan Pengaturan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('schedule_enabled').addEventListener('change', function() {
+        document.getElementById('schedule-fields').classList.toggle('hidden', !this.checked);
+    });
+</script>
+
+<%- include('../partials/admin-footer') %>
