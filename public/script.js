@@ -18,13 +18,13 @@ function initApp() {
     initThemeToggle();
     initMobileMenu();
     initScrollAnimations();
-    initCartSystem();
     initSmoothScrolling();
     initModalSystem();
     initNotificationModal();
     initFormValidation();
     initLoadingState();
     initTypingAnimation();
+    initUserInteractions(); 
    
     // Check for saved cart items in localStorage
     loadCartFromStorage();
@@ -301,41 +301,59 @@ async function fetchProducts() {
     }
 }
 
-function initCartSystem() {
-    const cartButton = document.getElementById('cart-button');
+// FUNGSI BARU YANG MENGGABUNGKAN SEMUA LOGIKA INTERAKSI
+function initUserInteractions() {
+    // Cek status login pengguna dengan cara yang lebih andal
+    const isLoggedIn = !document.getElementById('login-button'); 
+
+    const productsContainer = document.getElementById('produk');
+    const cartButton = document.getElementById('cart-button-trigger');
     const cartModal = document.getElementById('cart-modal');
     const closeCartButton = document.getElementById('close-cart-button');
-    const checkoutButton = document.getElementById('checkout-button');
 
-    if (cartButton && cartModal) {
-        cartButton.addEventListener('click', function () {
-            openModal(cartModal);
-        });
-    }
-
-    if (closeCartButton) {
-        closeCartButton.addEventListener('click', function () {
-            closeModal(cartModal);
-        });
-    }
-
-    if (cartModal) {
-        cartModal.addEventListener('click', function (e) {
-            if (e.target === cartModal) {
-                closeModal(cartModal);
+    // 1. Logika untuk tombol "Tambah ke Keranjang"
+    if (productsContainer) {
+        productsContainer.addEventListener('click', function(event) {
+            const button = event.target.closest('.add-to-cart-btn');
+            if (button) {
+                event.preventDefault(); // Selalu cegah aksi default untuk keamanan
+                if (isLoggedIn) {
+                    const productId = button.dataset.productId;
+                    if (productId) {
+                        addToCart(parseInt(productId, 10));
+                    }
+                } else {
+                    // Jika belum login, tampilkan toast dan arahkan
+                    showToast('Anda harus login untuk menambahkan ke keranjang.', 'info');
+                    setTimeout(() => { window.location.href = '/login'; }, 1500);
+                }
             }
         });
     }
 
-    if (checkoutButton) {
-        checkoutButton.addEventListener('click', function () {
-            processCheckout();
+    // 2. Logika untuk ikon Keranjang di header
+    if (cartButton) {
+        cartButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            if (isLoggedIn) {
+                // Jika sudah login, buka modal keranjang
+                if (cartModal) openModal(cartModal);
+            } else {
+                // Jika belum login, tampilkan toast dan arahkan
+                showToast('Anda harus login untuk melihat keranjang.', 'info');
+                setTimeout(() => { window.location.href = '/login'; }, 1500);
+            }
         });
     }
 
-    const savedCart = localStorage.getItem('noriCart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
+    // 3. Logika untuk tombol-tombol di dalam modal (tetap sama)
+    if (closeCartButton) {
+        closeCartButton.addEventListener('click', () => closeModal(cartModal));
+    }
+    if (cartModal) {
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) closeModal(cartModal);
+        });
     }
 }
 
@@ -670,11 +688,14 @@ function showToast(message, type = 'success') {
     const toastIcon = toast.querySelector('i');
     const toastMessage = toast.querySelector('p');
 
-    toast.classList.remove('bg-green-500', 'bg-red-500');
+    toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
 
     if (type === 'error') {
         toast.classList.add('bg-red-500');
         toastIcon.className = 'fas fa-exclamation-circle';
+    } else if (type === 'info') {
+        toast.classList.add('bg-blue-500'); // Warna baru untuk info
+        toastIcon.className = 'fas fa-info-circle';
     } else {
         toast.classList.add('bg-green-500');
         toastIcon.className = 'fas fa-check-circle';

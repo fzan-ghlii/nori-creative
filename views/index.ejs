@@ -123,10 +123,22 @@
                             <span id="notification-dot" class="absolute top-0 right-0 bg-red-500 rounded-full h-2 w-2"></span>
                         </button>
 
-                        <button id="cart-button" class="relative text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition duration-300 group">
+                        <button id="cart-button-trigger" class="relative text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition duration-300 group">
                             <i class="fas fa-shopping-cart text-xl group-hover:scale-110 transition-transform"></i>
                             <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 scale-0">0</span>
                         </button>
+
+                        <% if (isLoggedIn) { %>
+                        <!-- Jika SUDAH login, tampilkan ikon profil -->
+                            <a href="/profile" id="profile-button" class="relative text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition duration-300 group">
+                                <i class="fas fa-user-circle text-2xl group-hover:scale-110 transition-transform"></i>
+                            </a>
+                        <% } else { %>
+                        <!-- Jika BELUM login, tampilkan ikon login -->
+                            <a href="/login" id="login-button" class="relative text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition duration-300 group">
+                                <i class="fas fa-sign-in-alt text-2xl group-hover:scale-110 transition-transform"></i>
+                            </a>
+                        <% } %>
         
                         <button id="mobile-menu-button" class="md:hidden text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition duration-300 hamburger-button">
                             <span></span>

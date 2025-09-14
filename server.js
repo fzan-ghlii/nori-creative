@@ -13,6 +13,8 @@ const oneDay = 1000 * 60 * 60 * 24;
 const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const apiRoutes = require('./routes/apiRoutes'); // <-- 1. Impor rute API baru
+const authRoutes = require('./routes/authRoutes'); // Impor rute otentikasi baru
+
 
 // Middleware
 const { trackVisit } = require('./middlewares/trackingMiddleware');
@@ -77,7 +79,12 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Sajikan file statis dari folder public
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: oneDay }));
-
+app.use((req, res, next) => {
+    res.locals.isLoggedIn = req.session.isLoggedIn || false;
+    res.locals.user = req.session.user || null;
+    next();
+});
+app.use(authRoutes); // Daftarkan rute otentikasi
 // ======================= 4. GANTI URL ADMIN & TERAPKAN PEMBATAS =======================
 // URL baru yang tidak mudah ditebak. Anda bisa menggantinya sesuka hati.
 const secretAdminPath = '/nori-secret-panel';

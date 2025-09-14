@@ -57,7 +57,12 @@ const maintenanceCheck = async (req, res, next) => {
 
     } catch (error) {
         console.error('Error di middleware maintenance:', error);
-        next();
+        // Fallback: balikin HTML, bukan text/plain
+        return res
+            .status(500)
+            .send(
+                '<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Terjadi Kesalahan Server</h1><p>Silakan coba lagi nanti.</p></body></html>'
+            );
     }
 };
 
