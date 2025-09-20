@@ -11,3 +11,12 @@ exports.isAuth = (req, res, next) => {
         res.redirect('/nori-secret-panel/login');
     }
 };
+
+// --- MIDDLEWARE BARU UNTUK PENGGUNA BIASA ---
+exports.isUserAuth = (req, res, next) => {
+    if (req.session.isLoggedIn && req.session.user) {
+        next(); // Jika sudah login, izinkan lanjut
+    } else {
+        res.redirect('/login'); // Jika belum, tendang ke halaman login
+    }
+};

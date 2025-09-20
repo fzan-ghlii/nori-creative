@@ -2,82 +2,101 @@
 const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-// Menampilkan halaman Register
-exports.showRegisterPage = (req, res) => {
-    res.render('register', { error: null, success: null });
-};
+// Fungsi showRegisterPage dan showLoginPage sudah tidak diperlukan lagi
 
-// Menangani data pendaftaran baru
 exports.handleRegister = async (req, res) => {
     const { name, email, password, confirm_password } = req.body;
 
+    if (!name || !email || !password) {
+        return res.status(400).json({ success: false, error: 'Semua field wajib diisi.' });
+    }
     if (password !== confirm_password) {
-        return res.render('register', { error: 'Password dan konfirmasi password tidak cocok.', success: null });
+        return res.status(400).json({ success: false, error: 'Password dan konfirmasi password tidak cocok.' });
     }
 
     try {
         const [users] = await db.query('SELECT email FROM users WHERE email = ?', [email]);
         if (users.length > 0) {
-            return res.render('register', { error: 'Email sudah terdaftar. Silakan gunakan email lain.', success: null });
+            return res.status(400).json({ success: false, error: 'Email sudah terdaftar.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
-
         await db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword]);
         
-        // Alihkan ke halaman login dengan pesan sukses
-        res.render('login', { error: null, success: 'Pendaftaran berhasil! Silakan login.' });
-
+        res.status(201).json({ success: true, message: 'Pendaftaran berhasil! Silakan login.' });
     } catch (error) {
         console.error('Error saat registrasi:', error);
-        res.render('register', { error: 'Terjadi kesalahan pada server. Coba lagi nanti.', success: null });
+        res.status(500).json({ success: false, error: 'Terjadi kesalahan pada server.' });
     }
 };
 
-// Menampilkan halaman Login
-exports.showLoginPage = (req, res) => {
-    res.render('login', { error: null, success: null });
-};
-
-// Menangani data login
 exports.handleLogin = async (req, res) => {
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ success: false, error: 'Email dan password wajib diisi.' });
+    }
     try {
         const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         if (users.length === 0) {
-            return res.render('login', { error: 'Email atau password salah.', success: null });
+            return res.status(401).json({ success: false, error: 'Email atau password salah.' });
         }
         
         const user = users[0];
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
-            return res.render('login', { error: 'Email atau password salah.', success: null });
+            return res.status(401).json({ success: false, error: 'Email atau password salah.' });
         }
         
-        // Simpan info pengguna di session
-        req.session.user = {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        };
+        req.session.user = { id: user.id, name: user.name, email: user.email };
         req.session.isLoggedIn = true;
 
-        res.redirect('/'); // Alihkan ke halaman utama setelah berhasil login
-
+        res.status(200).json({ success: true, message: 'Login berhasil!' });
     } catch (error) {
         console.error('Error saat login:', error);
-        res.render('login', { error: 'Terjadi kesalahan pada server.', success: null });
+        res.status(500).json({ success: false, error: 'Terjadi kesalahan pada server.' });
     }
 };
 
-// Menangani logout
 exports.handleLogout = (req, res) => {
     req.session.destroy(err => {
         if (err) {
             console.error('Gagal logout:', err);
-            return res.redirect('/');
         }
         res.redirect('/');
     });
+};
+
+exports.showProfilePage = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        
+        // 1. Ambil data pesanan utama pengguna
+        const [orders] = await db.query(
+            `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
+            [userId]
+        );
+
+        // 2. Ambil semua item dari semua pesanan pengguna
+        const [allItems] = await db.query(
+            `SELECT oi.* FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.user_id = ?`,
+            [userId]
+        );
+
+        // 3. Gabungkan item ke dalam pesanan yang sesuai
+        const ordersWithItems = orders.map(order => {
+            return {
+                ...order,
+                items: allItems.filter(item => item.order_id === order.id)
+            };
+        });
+
+        res.render('profile', {
+            // 'user' sudah tersedia secara global dari middleware di server.js
+            orders: ordersWithItems
+        });
+
+    } catch (error) {
+        console.error('Error saat mengambil data profil:', error);
+        res.redirect('/');
+    }
 };

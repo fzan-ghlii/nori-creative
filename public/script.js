@@ -24,6 +24,7 @@ function initApp() {
     initFormValidation();
     initLoadingState();
     initTypingAnimation();
+    initAuthModals();
     initUserInteractions(); 
    
     // Check for saved cart items in localStorage
@@ -301,31 +302,151 @@ async function fetchProducts() {
     }
 }
 
+// ======================= FUNGSI BARU UNTUK MODAL OTENTIKASI =======================
+function initAuthModals() {
+    const loginModal = document.getElementById('login-modal');
+    const registerModal = document.getElementById('register-modal');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    // Tombol untuk berpindah antar modal
+    const switchToRegisterBtn = document.getElementById('switch-to-register');
+    const switchToLoginBtn = document.getElementById('switch-to-login');
+
+    if (!loginModal || !registerModal) return;
+
+    // Logika berpindah dari Login ke Register
+    if (switchToRegisterBtn) {
+        switchToRegisterBtn.addEventListener('click', () => {
+            closeModal(loginModal);
+            openModal(registerModal);
+        });
+    }
+
+    // Logika berpindah dari Register ke Login
+    if (switchToLoginBtn) {
+        switchToLoginBtn.addEventListener('click', () => {
+            closeModal(registerModal);
+            openModal(loginModal);
+        });
+    }
+
+    // Menangani submit form login dengan fetch
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const formData = new FormData(loginForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('Login berhasil!', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    const errorMsg = document.getElementById('login-error-message');
+                    errorMsg.textContent = result.error;
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (err) {
+                showToast('Terjadi kesalahan jaringan.', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+    }
+
+    // Menangani submit form register dengan fetch
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    closeModal(registerModal);
+                    openModal(loginModal);
+                } else {
+                     const errorMsg = document.getElementById('register-error-message');
+                    errorMsg.textContent = result.error;
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (err) {
+                 showToast('Terjadi kesalahan jaringan.', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+    }
+}
+
 // FUNGSI BARU YANG MENGGABUNGKAN SEMUA LOGIKA INTERAKSI
 function initUserInteractions() {
     // Cek status login pengguna dengan cara yang lebih andal
     const isLoggedIn = !document.getElementById('login-button'); 
+    const loginButtonInHeader = document.getElementById('login-button'); 
+    const loginModal = document.getElementById('login-modal');
 
     const productsContainer = document.getElementById('produk');
     const cartButton = document.getElementById('cart-button-trigger');
     const cartModal = document.getElementById('cart-modal');
     const closeCartButton = document.getElementById('close-cart-button');
+    const checkoutButton = document.getElementById('checkout-button'); 
+
+   const showLoginPrompt = () => {
+        showToast('Anda harus login terlebih dahulu.', 'info');
+        if (loginModal) {
+            setTimeout(() => { openModal(loginModal); }, 1500);
+        }
+    };
+
+    function populateCheckoutForm() {
+    // Cek apakah variabel global loggedInUser ada
+    if (typeof loggedInUser !== 'undefined' && loggedInUser) {
+        const nameInput = document.getElementById('customer-name');
+        const emailInput = document.getElementById('customer-email');
+
+        if (nameInput) {
+            nameInput.value = loggedInUser.name;
+            nameInput.readOnly = true; // Buat input tidak bisa diubah
+            nameInput.classList.add('bg-slate-200', 'dark:bg-slate-600', 'cursor-not-allowed');
+        }
+        if (emailInput) {
+            emailInput.value = loggedInUser.email;
+            emailInput.readOnly = true; // Buat input tidak bisa diubah
+            emailInput.classList.add('bg-slate-200', 'dark:bg-slate-600', 'cursor-not-allowed');
+        }
+    }
+}
 
     // 1. Logika untuk tombol "Tambah ke Keranjang"
     if (productsContainer) {
-        productsContainer.addEventListener('click', function(event) {
+        productsContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.add-to-cart-btn');
             if (button) {
-                event.preventDefault(); // Selalu cegah aksi default untuk keamanan
+                event.preventDefault();
                 if (isLoggedIn) {
                     const productId = button.dataset.productId;
-                    if (productId) {
-                        addToCart(parseInt(productId, 10));
-                    }
+                    if (productId) addToCart(parseInt(productId, 10));
                 } else {
-                    // Jika belum login, tampilkan toast dan arahkan
-                    showToast('Anda harus login untuk menambahkan ke keranjang.', 'info');
-                    setTimeout(() => { window.location.href = '/login'; }, 1500);
+                    showLoginPrompt();
                 }
             }
         });
@@ -333,15 +454,27 @@ function initUserInteractions() {
 
     // 2. Logika untuk ikon Keranjang di header
     if (cartButton) {
-        cartButton.addEventListener('click', function(event) {
+        cartButton.addEventListener('click', (event) => {
             event.preventDefault();
             if (isLoggedIn) {
-                // Jika sudah login, buka modal keranjang
-                if (cartModal) openModal(cartModal);
+                if (cartModal) {
+                    // ======================= PERUBAHAN DI SINI =======================
+                    // Panggil fungsi baru untuk mengisi data sebelum membuka modal
+                    populateCheckoutForm();
+                    // ===============================================================
+                    openModal(cartModal);
+                }
             } else {
-                // Jika belum login, tampilkan toast dan arahkan
-                showToast('Anda harus login untuk melihat keranjang.', 'info');
-                setTimeout(() => { window.location.href = '/login'; }, 1500);
+                showLoginPrompt();
+            }
+        });
+    }
+
+    if (loginButtonInHeader) {
+        loginButtonInHeader.addEventListener('click', (event) => {
+            event.preventDefault(); // Mencegah pindah ke halaman /login
+            if (loginModal) {
+                openModal(loginModal); // Buka modal login
             }
         });
     }
@@ -355,7 +488,17 @@ function initUserInteractions() {
             if (e.target === cartModal) closeModal(cartModal);
         });
     }
+
+    // 4. LOGIKA BARU UNTUK MENGHUBUNGKAN TOMBOL CHECKOUT
+    if (checkoutButton) {
+        checkoutButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            processCheckout(); // Panggil fungsi checkout Anda
+        });
+    }
 }
+
+
 
 function addToCart(productId) {
     // Pastikan data produk sudah ada
@@ -510,45 +653,49 @@ function updateCartUI() {
 function processCheckout() {
     const customerNameEl = document.getElementById('customer-name');
     const customerEmailEl = document.getElementById('customer-email');
-    const customerNotes = document.getElementById('customer-notes');
+    const customerNotesEl = document.getElementById('customer-notes');
     const ticketNumberEl = document.getElementById('ticket-number');
 
-    // Validasi input
-    if (!customerNameEl || !customerNameEl.value.trim()) {
-        showToast('Mohon isi nama lengkap', 'error');
-        customerNameEl.focus();
+    // 2. Lakukan validasi PADA ELEMEN, bukan nilainya
+    if (!customerNameEl || !customerEmailEl || !customerNotesEl || !ticketNumberEl) {
+        showToast('Terjadi kesalahan pada form checkout.', 'error');
         return;
     }
 
-    if (!customerEmailEl || !customerEmailEl.value.trim()) {
-        showToast('Mohon isi alamat email', 'error');
-        customerEmailEl.focus();
+    // 3. Sekarang, ambil nilainya dengan aman
+    const customerName = customerNameEl.value.trim();
+    const customerEmail = customerEmailEl.value.trim();
+    const customerNotes = customerNotesEl.value.trim();
+    const ticketNumber = ticketNumberEl.textContent;
+
+     // Validasi input (opsional karena sudah auto-fill, tapi bagus untuk keamanan)
+    if (!customerName || !customerEmail) {
+        showToast('Nama dan Email wajib diisi.', 'error');
         return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(customerEmailEl.value)) {
-        showToast('Mohon isi alamat email yang valid', 'error');
-        customerEmailEl.focus();
-        return;
-    }
-
-    const checkoutData = {
-        customerName: customerNameEl.value.trim(),
-        customerEmail: customerEmailEl.value.trim(),
-        customerNotes: customerNotes.value.trim(),
+    const orderData = {
+        customerName,
+        customerEmail,
+        customerNotes,
         cartItems: cart,
-        ticketNumber: ticketNumberEl.textContent,
+        ticketNumber
     };
+
 
     showLoading(); // Tampilkan spinner loading
 
     fetch('/payment/create-transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutData),
+        body: JSON.stringify(orderData),
     })
-        .then((res) => res.json())
+        .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.message || 'Gagal membuat transaksi.') });
+        }
+        return res.json();
+    })
         .then((data) => {
             hideLoading();
             if (data.transactionToken) {

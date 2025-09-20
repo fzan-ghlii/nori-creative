@@ -2,20 +2,19 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { isUserAuth } = require('../middlewares/authMiddleware'); // Impor middleware baru
 
-// Rute untuk menampilkan halaman register
-router.get('/register', authController.showRegisterPage);
 
 // Rute untuk memproses data register
 router.post('/register', authController.handleRegister);
-
-// Rute untuk menampilkan halaman login
-router.get('/login', authController.showLoginPage);
 
 // Rute untuk memproses data login
 router.post('/login', authController.handleLogin);
 
 // Rute untuk logout
 router.get('/logout', authController.handleLogout);
+
+// RUTE BARU UNTUK HALAMAN PROFIL (DIPROTEKSI)
+router.get('/profile', isUserAuth, authController.showProfilePage);
 
 module.exports = router;

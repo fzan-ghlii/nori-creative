@@ -454,7 +454,76 @@
     
     </div> <!-- End of content-wrapper -->
 
+    <!-- Modal Login -->
+<div id="login-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4 hidden transition-opacity duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md transform transition-transform duration-300 scale-95">
+        <div class="p-8 space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Selamat Datang Kembali</h2>
+                <p class="text-slate-500 dark:text-slate-400">Silakan login untuk melanjutkan.</p>
+            </div>
+            
+            <div id="login-error-message" class="bg-red-500/10 text-red-500 text-sm p-3 rounded-lg hidden"></div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Email</label>
+                    <input type="email" name="email" id="login-email" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Password</label>
+                    <input type="password" name="password" id="login-password" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition">Login</button>
+            </form>
+            <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+                Belum punya akun? <button id="switch-to-register" class="font-medium text-cyan-500 hover:underline">Daftar di sini</button>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Register -->
+<div id="register-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4 hidden transition-opacity duration-300 opacity-0">
+     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md transform transition-transform duration-300 scale-95">
+        <div class="p-8 space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Buat Akun Baru</h2>
+                <p class="text-slate-500 dark:text-slate-400">Hanya butuh beberapa detik.</p>
+            </div>
+            
+            <div id="register-error-message" class="bg-red-500/10 text-red-500 text-sm p-3 rounded-lg hidden"></div>
+
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="register-name" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Nama Lengkap</label>
+                    <input type="text" name="name" id="register-name" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Email</label>
+                    <input type="email" name="email" id="register-email" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Password</label>
+                    <input type="password" name="password" id="register-password" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-slate-600 dark:text-slate-300">Konfirmasi Password</label>
+                    <input type="password" name="confirm_password" id="confirm-password" required class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-md transition">Daftar</button>
+            </form>
+            <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+                Sudah punya akun? <button id="switch-to-login" class="font-medium text-cyan-500 hover:underline">Login di sini</button>
+            </p>
+        </div>
+    </div>
+</div>
+
     <!-- Link ke file JS di folder public -->
+     <script>
+        const loggedInUser = <%- JSON.stringify(user || null) %>;
+    </script>
     <script src="/script.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
