@@ -302,18 +302,23 @@ async function fetchProducts() {
     }
 }
 
-// ======================= FUNGSI BARU UNTUK MODAL OTENTIKASI =======================
+// ======================= FUNGSI MODAL OTENTIKASI (DIPERBARUI) =======================
 function initAuthModals() {
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
+    // 1. Ambil elemen modal notifikasi aktivasi yang baru
+    const activationNoticeModal = document.getElementById('activation-notice-modal');
+
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
     // Tombol untuk berpindah antar modal
     const switchToRegisterBtn = document.getElementById('switch-to-register');
     const switchToLoginBtn = document.getElementById('switch-to-login');
+    // 2. Ambil tombol tutup untuk modal baru
+    const closeActivationNoticeBtn = document.getElementById('close-activation-notice-btn');
 
-    if (!loginModal || !registerModal) return;
+    if (!loginModal || !registerModal || !activationNoticeModal) return;
 
     // Logika berpindah dari Login ke Register
     if (switchToRegisterBtn) {
@@ -331,7 +336,23 @@ function initAuthModals() {
         });
     }
 
-    // Menangani submit form login dengan fetch
+    // 3. Tambahkan event listener untuk tombol tutup modal notifikasi
+    if (closeActivationNoticeBtn) {
+        closeActivationNoticeBtn.addEventListener('click', () => {
+            closeModal(activationNoticeModal);
+        });
+    }
+    
+    // Menangani klik di luar area modal untuk semua modal otentikasi
+    [loginModal, registerModal, activationNoticeModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        });
+    });
+
+    // Menangani submit form login (tidak ada perubahan)
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -363,7 +384,7 @@ function initAuthModals() {
         });
     }
 
-    // Menangani submit form register dengan fetch
+    // Menangani submit form register (logika sukses diubah)
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -380,9 +401,12 @@ function initAuthModals() {
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast(result.message, 'success');
+                    // ========== PERUBAHAN UTAMA DI SINI ==========
+                    registerForm.reset();
                     closeModal(registerModal);
-                    openModal(loginModal);
+                    // Buka modal notifikasi aktivasi, bukan modal login
+                    openModal(activationNoticeModal);
+                    // ===========================================
                 } else {
                      const errorMsg = document.getElementById('register-error-message');
                     errorMsg.textContent = result.error;
