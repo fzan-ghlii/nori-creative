@@ -66,17 +66,13 @@ exports.createTransaction = async (req, res) => {
         const transaction = await snap.createTransaction(parameter);
         const transactionToken = transaction.token;
 
-        const orderQuery = `INSERT INTO orders (ticket_number, customer_name, customer_email, total_amount, status, payment_gateway_invoice_id, customer_notes, user_id) 
-                            VALUES (?, ?, ?, ?, 'PENDING', ?, ?, ?)`;
+         // ========== PERUBAHAN PENTING DI SINI: SIMPAN TOKEN KE DB ==========
+        const orderQuery = `INSERT INTO orders (ticket_number, customer_name, customer_email, total_amount, status, payment_gateway_invoice_id, midtrans_token, customer_notes, user_id) 
+                            VALUES (?, ?, ?, ?, 'PENDING', ?, ?, ?, ?)`;
         const [orderResult] = await connection.query(orderQuery, [
-            ticketNumber,
-            customerName,
-            customerEmail,
-            serverTotalAmount,
-            ticketNumber,
-            customerNotes,
-            loggedInUser.id,
+            ticketNumber, loggedInUser.name, loggedInUser.email, serverTotalAmount, ticketNumber, transactionToken, customerNotes, loggedInUser.id,
         ]);
+        // ===================================================================
 
         const newOrderId = orderResult.insertId;
 
@@ -233,3 +229,32 @@ exports.handleMidtransNotification = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+// ======================= FUNGSI RESUME TRANSACTION (DIROMBAK TOTAL) =======================
+exports.resumeTransaction = async (req, res) => {
+    try {
+        const { orderId } = req.body; // Ini adalah ticket_number
+        const userId = req.session.user.id;
+
+        // 1. BUKAN MEMBUAT TRANSAKSI BARU, TAPI MENGAMBIL TOKEN YANG SUDAH ADA
+        const [orders] = await db.query(
+            'SELECT midtrans_token FROM orders WHERE ticket_number = ? AND user_id = ? AND status = "PENDING"',
+            [orderId, userId]
+        );
+
+        if (orders.length === 0 || !orders[0].midtrans_token) {
+            return res.status(404).json({ message: 'Pembayaran tidak ditemukan atau sudah diproses.' });
+        }
+
+        const transactionToken = orders[0].midtrans_token;
+
+        // 2. LANGSUNG KIRIM TOKEN YANG ADA KEMBALI KE FRONTEND
+        res.status(200).json({ transactionToken });
+
+    } catch (error) {
+        console.error('Error saat melanjutkan transaksi:', error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
+    }
+};
+// ==========================================================================================
+

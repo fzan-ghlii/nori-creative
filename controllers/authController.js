@@ -66,6 +66,7 @@ exports.handleLogout = (req, res) => {
     });
 };
 
+// ======================= FUNGSI HALAMAN PROFIL DENGAN DETAIL ITEM =======================
 exports.showProfilePage = async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -76,23 +77,23 @@ exports.showProfilePage = async (req, res) => {
             [userId]
         );
 
-        // 2. Ambil semua item dari semua pesanan pengguna
-        const [allItems] = await db.query(
-            `SELECT oi.* FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.user_id = ?`,
-            [userId]
-        );
+        if (orders.length > 0) {
+            // 2. Ambil semua item dari semua pesanan pengguna dalam satu query
+            const orderIds = orders.map(o => o.id);
+            const [allItems] = await db.query(
+                `SELECT * FROM order_items WHERE order_id IN (?)`,
+                [orderIds]
+            );
 
-        // 3. Gabungkan item ke dalam pesanan yang sesuai
-        const ordersWithItems = orders.map(order => {
-            return {
-                ...order,
-                items: allItems.filter(item => item.order_id === order.id)
-            };
-        });
+            // 3. Gabungkan item ke dalam pesanan yang sesuai (lebih efisien)
+            orders.forEach(order => {
+                order.items = allItems.filter(item => item.order_id === order.id);
+            });
+        }
 
         res.render('profile', {
             // 'user' sudah tersedia secara global dari middleware di server.js
-            orders: ordersWithItems
+            orders: orders // Sekarang setiap 'order' punya properti 'items'
         });
 
     } catch (error) {
@@ -100,3 +101,4 @@ exports.showProfilePage = async (req, res) => {
         res.redirect('/');
     }
 };
+// =====================================================================================

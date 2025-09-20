@@ -1,19 +1,62 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Saya - NORI</title>
-    <link rel="stylesheet" href="/admin-style.css"> <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-<body class="bg-slate-900">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <script 
+        type="text/javascript"
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="<%= process.env.MIDTRANS_CLIENT_KEY %>">
+    </script>
+     <style>
+        .details-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+        }
+        .details-section.open {
+            max-height: 500px; /* Cukup besar untuk menampung beberapa item */
+            margin-top: 1rem;
+        }
+        .details-toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        .details-toggle-icon.open {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300">
     <header class="bg-slate-800 shadow-md">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="/" class="flex items-center space-x-3 group">
-                <img src="/images/logo.webp" class="h-12 w-auto">
+                <img src="/images/logo.webp" class="h-12 w-auto" alt="NORI Logo">
             </a>
             <div class="flex items-center space-x-4">
-                <span class="text-slate-300 hidden sm:block">Halo, <%= user.name %>!</span>
+                <span class="hidden sm:block">Halo, <%= user.name %>!</span>
                 <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold text-sm py-2 px-4 rounded-md transition duration-300 flex items-center">
                     <i class="fas fa-sign-out-alt mr-2"></i>
                     <span>Logout</span>
@@ -39,28 +82,144 @@
                             <p class="text-slate-200 font-medium"><%= user.email %></p>
                         </div>
                     </div>
-                    <button class="w-full mt-6 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-2 px-4 rounded-md transition">
-                        Edit Profil (Coming Soon)
-                    </button>
                 </div>
             </div>
 
             <div class="lg:col-span-2">
                 <h2 class="text-xl font-semibold text-white mb-4">Riwayat Pesanan</h2>
-                <div class="space-y-4">
-                    <% if (orders.length > 0) { %>
-                        <% orders.forEach(order => { %>
-                            <div class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
+                <div id="order-history-container" class="space-y-4">
+                    <% if (orders && orders.length > 0) { %>
+                        <% orders.forEach((order, index) => { %>
+                            <div class="bg-slate-800 p-4 sm:p-6 rounded-xl shadow-lg border border-slate-700">
+                                <!-- Bagian Ringkasan Pesanan -->
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                    <div>
+                                        <p class="font-bold text-white text-lg"><%= order.ticket_number %></p>
+                                        <p class="text-xs text-slate-500 mt-1"><%= new Date(order.created_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) %></p>
+                                    </div>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="text-right">
+                                            <p class="font-semibold text-white text-lg"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_amount) %></p>
+                                        </div>
+                                        <div class="text-center w-40">
+                                             <% if (order.status === 'PENDING') { %><span class="inline-block w-full text-center px-3 py-1 text-sm font-semibold text-yellow-800 bg-yellow-200 rounded-full mb-2">Menunggu Pembayaran</span><button class="resume-payment-btn w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs py-2 px-3 rounded-md transition" data-order-id="<%= order.ticket_number %>"><i class="fas fa-credit-card mr-1"></i> Bayar Sekarang</button><% } else if (order.status === 'SUCCESS') { %><span class="inline-block w-full text-center px-3 py-1 text-sm font-semibold text-green-800 bg-green-200 rounded-full">Berhasil Dibayar</span><% } else if (order.status === 'PROCESSING') { %><span class="inline-block w-full text-center px-3 py-1 text-sm font-semibold text-blue-800 bg-blue-200 rounded-full">Diproses</span><% } else if (order.status === 'COMPLETED') { %><span class="inline-block w-full text-center px-3 py-1 text-sm font-semibold text-purple-800 bg-purple-200 rounded-full">Selesai</span><% } else if (order.status === 'FAILED') { %><span class="inline-block w-full text-center px-3 py-1 text-sm font-semibold text-red-800 bg-red-200 rounded-full">Gagal</span><% } %>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <!-- Tombol & Area Detail Item (BARU) -->
+                                <div class="mt-4 pt-4 border-t border-slate-700">
+                                    <button class="details-toggle-btn text-sm text-cyan-400 hover:text-cyan-300 w-full flex justify-between items-center">
+                                        <span>Lihat Detail Pesanan</span>
+                                        <i class="fas fa-chevron-down details-toggle-icon"></i>
+                                    </button>
+                                    <div id="details-<%= index %>" class="details-section">
+                                        <table class="w-full text-sm mt-2">
+                                            <thead>
+                                                <tr class="border-b border-slate-600">
+                                                    <th class="text-left font-semibold p-2">Produk</th>
+                                                    <th class="text-center font-semibold p-2">Jumlah</th>
+                                                    <th class="text-right font-semibold p-2">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            <% if (order.items && order.items.length > 0) { %>
+                                                <% order.items.forEach(item => { %>
+                                                <tr class="border-b border-slate-700">
+                                                    <td class="p-2"><%= item.product_name %></td>
+                                                    <td class="text-center p-2">x<%= item.quantity %></td>
+                                                    <td class="text-right p-2"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.price * item.quantity) %></td>
+                                                </tr>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <tr><td colspan="3" class="text-center p-4 text-slate-500">Detail item tidak ditemukan.</td></tr>
+                                            <% } %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         <% }) %>
                     <% } else { %>
-                        <div class="text-center text-slate-400 py-8 bg-slate-800 rounded-xl shadow-lg border border-slate-700">
-                            Anda belum memiliki riwayat pesanan.
-                        </div>
+                        <div class="text-center text-slate-400 py-8 bg-slate-800 rounded-xl"><p>Anda belum memiliki riwayat pesanan.</p></div>
                     <% } %>
                 </div>
             </div>
         </div>
     </main>
+
+    <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-60 z-[9999] flex items-center justify-center hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-500"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resumeButtons = document.querySelectorAll('.resume-payment-btn');
+            const spinner = document.getElementById('loading-spinner');
+
+            resumeButtons.forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Mencegah detail ikut terbuka saat tombol bayar diklik
+                    const orderId = e.currentTarget.dataset.orderId; // Gunakan currentTarget
+                    spinner.classList.remove('hidden');
+
+                    try {
+                        const response = await fetch('/payment/resume-transaction', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: orderId })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Gagal memuat ulang pembayaran.');
+                        }
+                        
+                        // Hentikan spinner SEBELUM membuka snap
+                        spinner.classList.add('hidden');
+
+                        // Buka pop-up pembayaran Midtrans dengan token baru
+                        window.snap.pay(data.transactionToken, {
+                            onSuccess: function(result){
+                                // Arahkan ke halaman profil agar user lihat statusnya berubah
+                                window.location.href = '/profile';
+                            },
+                            onPending: function(result){
+                                alert("Pembayaran Anda sedang diproses. Halaman akan dimuat ulang.");
+                                window.location.reload();
+                            },
+                            onError: function(result){
+                                alert("Pembayaran gagal. Silakan coba lagi.");
+                                spinner.classList.add('hidden');
+                            },
+                            onClose: function(){
+                                console.log('Popup ditutup tanpa menyelesaikan pembayaran.');
+                                spinner.classList.add('hidden');
+                            }
+                        });
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message);
+                        spinner.classList.add('hidden');
+                    }
+
+                    
+                });
+            });
+
+             // Logika untuk tombol "Lihat Detail" (accordion)
+            const detailToggles = document.querySelectorAll('.details-toggle-btn');
+            detailToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const detailsSection = toggle.nextElementSibling;
+                    const icon = toggle.querySelector('.details-toggle-icon');
+                    detailsSection.classList.toggle('open');
+                    icon.classList.toggle('open');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
